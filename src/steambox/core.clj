@@ -8,12 +8,12 @@
 
 
 (def cowbell (resource-sample "cowbell_FF_1.wav"))
-(def crash1 (resource-sample "crash1_OH_FF_1.wav"))
-(def hihatClosed (resource-sample "hihatClosed_OH_F_1.wav"))
-(def hiTom (resource-sample "hiTom_OH_FF_1.wav"))
+(def crash (resource-sample "crash1_OH_FF_1.wav"))
+(def hihat (resource-sample "hihatClosed_OH_F_1.wav"))
+(def hi-tom (resource-sample "hiTom_OH_FF_1.wav"))
 (def kick (resource-sample "kick_OH_F_1.wav"))
-(def loTom (resource-sample "loTom_OH_FF_1.wav"))
-(def ride1 (resource-sample "ride1_OH_FF_1.wav"))
+(def lo-tom (resource-sample "loTom_OH_FF_1.wav"))
+(def ride (resource-sample "ride1_OH_FF_1.wav"))
 (def snare (resource-sample "snare_OH_F_1.wav"))
 
 
