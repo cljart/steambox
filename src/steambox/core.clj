@@ -19,34 +19,57 @@
 ;; metronome
 (def metro (metronome 180))
 
+(def _ false)
+(def x true)
+
 ;; grid
+(def ^:dynamic *grid*
+  {
+   kick  [ x _ _ _ x _ _ _ ]
+   snare [ _ _ x _ _ _ x _ ]
+   hihat [ x x x x x x x x ]})
 
 (defn play-beat [beat]
-  ;;(hihat)
+  (hihat)
   (case beat
     0 (kick)
-    1 []
+    1 (hi-tom)
     2 (snare)
-    3 []
+    3 (lo-tom)
     4 (do
         (kick)
-        (cowbell))
+        )
     5 (kick)
     6 (do
         (snare)
-        (crash))
+        )
     7 []))
 
-(defn beat-scheduler [bar]
-  (doseq [beat (range 8)]
-    (let [time (metro (+ (* bar 8) beat))]
-      (apply-by time play-beat [beat]))))
+;; Schedule one bar (eight beats) of drums
+;;
+(defn bar-scheduler [bar] ;; bar: 1
+  (doseq [beat (range 8)] ;; beat: 0 1 2 3 4 5 6 7
+    (let [beat-in-bar (+ (* bar 8) beat) ;;
+                                         ;; beat-in-bar: 8 9 10 11 12 13 14 15
+          time (metro beat-in-bar)]      ;; time: ...ms ...ms ...ms
+      (apply-at time play-beat [beat])))
+
+  (let [beat-8 (+ (* bar 8) 8)
+        beat-8-time (metro beat-8)]
+    (apply-by beat-8-time bar-scheduler [(+ bar 1)])))
+
+(comment
+  (do (def metro (metronome 220))
+      (bar-scheduler 0))
+
+  (stop))
+
 
 (defn -main
   "Start Steambox!"
   [& args]
-  (doseq [bar (range 1 10)]
-    (beat-scheduler bar)))
+  (doseq [bar (range 10)]
+    (bar-scheduler bar)))
 
 (defn rimshot []
   (lo-tom)
@@ -60,7 +83,7 @@
 
 ;; Next steps:
 ;;
-;; - make beat-scheduler reschedule itself for the next bar
+;; - [DONE] make beat-scheduler reschedule itself for the next bar
 ;; - replace hard-coded grid with something in a var or atom
 ;; - build a GUI
 ;; - profit
