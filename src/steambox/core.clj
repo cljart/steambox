@@ -15,35 +15,40 @@
 (def crash (resource-sample "crash1_OH_FF_1.wav"))
 (def ride (resource-sample "ride1_OH_FF_1.wav"))
 
-
 ;; metronome
-(def metro (metronome 180))
+(def ^:dynamic *metro*)
 
 (def _ false)
 (def x true)
 
 ;; grid
 (def ^:dynamic *grid*
-  {
-   kick  [ x _ _ _ x _ _ _ ]
-   snare [ _ _ x _ _ _ x _ ]
-   hihat [ x x x x x x x x ]})
+  {       ;; 0 1 2 3 4 5 6 7
+   kick    [ x _ _ _ x _ _ _ ]
+   snare   [ _ _ _ _ _ _ x _ ]
+   hihat   [ x x _ x _ x _ x ]
+   hi-tom  [ _ _ _ _ _ _ _ _ ]
+   cowbell [ _ _ _ _ _ _ _ _ ]
+   crash   [ _ _ _ _ _ _ _ _ ]
+   ride    [ x _ _ _ x _ _ _ ] })
+
+ ;;   /\             /\
+ ;; instrument     pattern
+
+;; beat 0, 1, 2
+;; pattern [ false false true false false true false ]
+;; instrument #<some overtone shizle> => call it to play the instrument
+;; (instrument) plays the instrument
 
 (defn play-beat [beat]
-  (hihat)
-  (case beat
-    0 (kick)
-    1 (hi-tom)
-    2 (snare)
-    3 (lo-tom)
-    4 (do
-        (kick)
-        )
-    5 (kick)
-    6 (do
-        (snare)
-        )
-    7 []))
+  ;; look into grid, check all instruments if they're true for beat number
+  (doseq [x  *grid*] ;; x [kick [true false false ...]]
+    (let [instrument (first x)
+          pattern (last x)]
+    ;; let pattern = all values of map
+      (if (pattern beat) ;; if the vector named pattern at the index called beat is true
+        (instrument))))) ;; play the instrument
+
 
 ;; Schedule one bar (eight beats) of drums
 ;;
@@ -51,25 +56,22 @@
   (doseq [beat (range 8)] ;; beat: 0 1 2 3 4 5 6 7
     (let [beat-in-bar (+ (* bar 8) beat) ;;
                                          ;; beat-in-bar: 8 9 10 11 12 13 14 15
-          time (metro beat-in-bar)]      ;; time: ...ms ...ms ...ms
+          time (*metro* beat-in-bar)]      ;; time: ...ms ...ms ...ms
       (apply-at time play-beat [beat])))
 
   (let [beat-8 (+ (* bar 8) 8)
-        beat-8-time (metro beat-8)]
+        beat-8-time (*metro* beat-8)]
     (apply-by beat-8-time bar-scheduler [(+ bar 1)])))
 
-(comment
-  (do (def metro (metronome 220))
-      (bar-scheduler 0))
-
-  (stop))
-
+(defn start! []
+  (def ^:dynamic *metro*
+    (metronome 130))
+  (bar-scheduler 0))
 
 (defn -main
   "Start Steambox!"
   [& args]
-  (doseq [bar (range 10)]
-    (bar-scheduler bar)))
+  (start!))
 
 (defn rimshot []
   (lo-tom)
@@ -84,7 +86,8 @@
 ;; Next steps:
 ;;
 ;; - [DONE] make beat-scheduler reschedule itself for the next bar
-;; - replace hard-coded grid with something in a var or atom
+;; - [DONE] replace hard-coded grid with something in a var or atom
+;; - make music forever
 ;; - build a GUI
 ;; - profit
 ;;
